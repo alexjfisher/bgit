@@ -170,21 +170,23 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             log.error("no repo found, creating");
             CliGitClone clone = new CliGitClone();
             clone.clone(sourceDir.getParentFile(), repositoryUrl);
-            //dotGit.init();
-            //CliGitRemote remote = new CliGitRemote();
-            //remote.remote(sourceDir, Ref.createBranchRef("origin"), repositoryUrl);
+
+            submodule_update(sourceDir);
         }
         CliGitFetch fetch = new CliGitFetch();
         log.error("doing fetch");
         fetch.fetch(sourceDir);
         log.error("fetch complete");
 
+        return dotGit;
+    }
+
+    private void submodule_update(File sourceDir) throws IOException, JavaGitException
+    {
         log.error("doing submodule update");
         CliGitSubmodule submodule = new CliGitSubmodule();
         submodule.init(sourceDir);
         submodule.update(sourceDir);
-
-        return dotGit;
     }
 
     private File getCheckoutDirectory(String planKey) throws RepositoryException
@@ -285,6 +287,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
         // FIXME: should really only merge to the target revision
         merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
+
+        submodule_update(sourceDir);
 
         return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), planKey);
     }
