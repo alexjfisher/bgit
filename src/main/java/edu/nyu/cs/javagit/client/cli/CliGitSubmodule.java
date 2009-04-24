@@ -18,7 +18,7 @@ public class CliGitSubmodule implements IGitSubmodule
             throws JavaGitException, IOException
     {
         CheckUtilities.checkFileValidity(repoDirectory);
-        GitSubmoduleInitParser parser = new GitSubmoduleParser();
+        GitSubmoduleParser parser = new GitSubmoduleParser();
         List<String> command = buildInitCommand(repoDirectory);
         ProcessUtilities.runCommand(repoDirectory,
                 command, parser);
@@ -28,7 +28,7 @@ public class CliGitSubmodule implements IGitSubmodule
             throws JavaGitException, IOException
     {
         CheckUtilities.checkFileValidity(repoDirectory);
-        GitSubmoduleUpdateParser parser = new GitSubmoduleParser();
+        GitSubmoduleParser parser = new GitSubmoduleParser();
         List<String> command = buildUpdateCommand(repoDirectory);
         ProcessUtilities.runCommand(repoDirectory,
                 command, parser);

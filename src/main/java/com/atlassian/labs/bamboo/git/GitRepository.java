@@ -51,6 +51,7 @@ import edu.nyu.cs.javagit.api.commands.GitLogResponse;
 import edu.nyu.cs.javagit.api.commands.GitMerge;
 import edu.nyu.cs.javagit.client.cli.CliGitClone;
 import edu.nyu.cs.javagit.client.cli.CliGitFetch;
+import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
 
 public class GitRepository extends AbstractRepository implements WebRepositoryEnabledRepository, InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
 {
