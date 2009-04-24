@@ -177,6 +177,12 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         log.error("doing fetch");
         fetch.fetch(sourceDir);
         log.error("fetch complete");
+
+        log.error("doing submodule update");
+        CliGitSubmodule submodule = new CliGitSubmodule();
+        submodule.init(sourceDir);
+        submodule.update(sourceDir);
+
         return dotGit;
     }
 
