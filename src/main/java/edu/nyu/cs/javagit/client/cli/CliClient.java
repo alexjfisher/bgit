@@ -100,6 +100,10 @@ public class CliClient implements IClient {
     return new CliGitClone();
   }
 
+  public IGitClone getGitSubmoduleInstance() {
+    return new CliGitSubmodule();
+  }
+
     public IGitMerge getGitMergeInstance()
     {
         return new CliGitMerge();
