@@ -45,10 +45,7 @@ import com.opensymphony.util.UrlUtils;
 import edu.nyu.cs.javagit.api.DotGit;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.GitLog;
-import edu.nyu.cs.javagit.api.commands.GitLogOptions;
-import edu.nyu.cs.javagit.api.commands.GitLogResponse;
-import edu.nyu.cs.javagit.api.commands.GitMerge;
+import edu.nyu.cs.javagit.api.commands.*;
 import edu.nyu.cs.javagit.client.cli.CliGitClone;
 import edu.nyu.cs.javagit.client.cli.CliGitFetch;
 import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
@@ -265,14 +262,11 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         try
         {
             return retreiveSourceCodeWithException(planKey, vcsRevisionKey);
-        } catch (IOException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (JavaGitException e)
-        {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (IOException e) {
+            throw new RepositoryException("retrieveSourceCode", e);
+        } catch (JavaGitException e) {
+            throw new RepositoryException("retrieveSourceCode", e);
         }
-        return null;
     }
 
     String retreiveSourceCodeWithException(String planKey, String vcsRevisionKey) throws RepositoryException, IOException, JavaGitException
@@ -282,11 +276,15 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         File sourceDir = getCheckoutDirectory(planKey);
 
         fetch(sourceDir, repositoryUrl);
-        log.error("doing merge");
-        GitMerge merge = new GitMerge();
 
-        // FIXME: should really only merge to the target revision
-        merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
+        Ref branch = Ref.createBranchRef("origin/" + remoteBranch);
+        GitCheckout gitCheckout = new GitCheckout();
+        // Checkout to a local branch with same name as remote, to make it slightly easier to understand the
+        // content of the "checkout" folder if you need to diagnose
+        GitCheckoutOptions options = new GitCheckoutOptions();
+        options.setOptB( Ref.createBranchRef(remoteBranch));
+
+        gitCheckout.checkout( sourceDir, options, branch );
 
         submodule_update(sourceDir);
 
