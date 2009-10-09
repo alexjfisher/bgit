@@ -2,8 +2,6 @@ package com.atlassian.labs.bamboo.git;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -139,7 +137,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
             File sourceDir = getCheckoutDirectory(planKey);
 
-            DotGit dotGet = fetch(sourceDir, repositoryUrl);
+            cloneOrFetch(sourceDir, repositoryUrl);
             
             final List<Commit> commits = new ArrayList<Commit>();
 
@@ -177,6 +175,27 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
         return dotGit;
     }
+
+    private DotGit clone(File sourceDir, String repositoryUrl) throws IOException, JavaGitException
+    {
+        DotGit dotGit = DotGit.getInstance(sourceDir);
+        if (!sourceDir.exists()) {
+            log.error("no repo found, creating");
+            CliGitClone clone = new CliGitClone();
+            clone.clone(sourceDir.getParentFile(), repositoryUrl);
+
+            submodule_update(sourceDir);
+        }
+        return dotGit;
+    }
+
+    private void checkout(File sourceDir, Ref remoteBranch, Ref localBranch) throws IOException, JavaGitException {
+        GitCheckout gitCheckout = new GitCheckout();
+        GitCheckoutOptions options = new GitCheckoutOptions();
+        options.setOptB(localBranch);
+        gitCheckout.checkout( sourceDir, options, remoteBranch );
+    }
+
 
     private void submodule_update(File sourceDir) throws IOException, JavaGitException
     {
@@ -275,24 +294,30 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
         File sourceDir = getCheckoutDirectory(planKey);
 
-        fetch(sourceDir, repositoryUrl);
-
-        Ref branch = Ref.createBranchRef("origin/" + remoteBranch);
-        GitCheckout gitCheckout = new GitCheckout();
-        // Checkout to a local branch with same name as remote, to make it slightly easier to understand the
-        // content of the "checkout" folder if you need to diagnose
-        GitCheckoutOptions options = new GitCheckoutOptions();
-        options.setOptB( Ref.createBranchRef(remoteBranch));
-
-        gitCheckout.checkout( sourceDir, options, branch );
+        cloneOrFetch(sourceDir, repositoryUrl);
 
         submodule_update(sourceDir);
 
         return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), planKey);
     }
 
+    private void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
+        Ref remoteBranch = Ref.createBranchRef("origin/" + this.remoteBranch);
+        Ref localBranch = Ref.createBranchRef(this.remoteBranch);
 
-    
+        if (sourceDir.exists()) {
+            fetch(sourceDir, repositoryUrl);
+            log.error("doing merge");
+            GitMerge merge = new GitMerge();
+            // FIXME: should really only merge to the target revision
+            merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
+        } else {
+            clone( sourceDir, repositoryUrl);
+            checkout( sourceDir, remoteBranch, localBranch );
+        }
+    }
+
+
     public ErrorCollection validate( BuildConfiguration buildConfiguration)
     {
         ErrorCollection errorCollection = super.validate(buildConfiguration);
