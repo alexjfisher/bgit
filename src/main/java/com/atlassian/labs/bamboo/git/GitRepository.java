@@ -15,6 +15,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import com.atlassian.bamboo.author.Author;
 import com.atlassian.bamboo.author.AuthorImpl;
@@ -135,7 +136,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
             String repositoryUrl = getSubstitutedRepositoryUrl();
 
-            File sourceDir = getCheckoutDirectory(planKey);
+            File sourceDir = getCheckoutDirectory(planKey);    //  Project/checkout is value
 
             cloneOrFetch(sourceDir, repositoryUrl);
             
@@ -274,7 +275,17 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return lastRevisionChecked;
     }
 
-    
+    @Override
+    public boolean referencesDifferentRepository() {
+        return super.referencesDifferentRepository();    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    @NotNull
+    @Override
+    public File getSourceCodeDirectory(@NotNull String s) throws RepositoryException {
+        return super.getSourceCodeDirectory(s);    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
     public String retrieveSourceCode( String planKey, String vcsRevisionKey) throws RepositoryException
     {
         log.error("retrieving source code");
@@ -291,9 +302,9 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     String retreiveSourceCodeWithException(String planKey, String vcsRevisionKey) throws RepositoryException, IOException, JavaGitException
     {
         String repositoryUrl = getSubstitutedRepositoryUrl();
-
+                          //  vcsRevisonKey == Fri Oct 9 14:51:41 2009 +0200
         File sourceDir = getCheckoutDirectory(planKey);
-
+                            // sourceedir = xxx/checkout
         cloneOrFetch(sourceDir, repositoryUrl);
 
         submodule_update(sourceDir);
@@ -301,7 +312,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), planKey);
     }
 
-    private void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
+    void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
         Ref remoteBranch = Ref.createBranchRef("origin/" + this.remoteBranch);
         Ref localBranch = Ref.createBranchRef(this.remoteBranch);
 
