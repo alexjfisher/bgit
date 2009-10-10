@@ -152,19 +152,19 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private DotGit fetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException
     {
-        log.error("fetching repo");
+        log.debug("fetching repo");
         DotGit dotGit = DotGit.getInstance(sourceDir);
         if (!sourceDir.exists()) {
-            log.error("no repo found, creating");
+            log.debug("no repo found, creating");
             CliGitClone clone = new CliGitClone();
             clone.clone(sourceDir.getParentFile(), repositoryUrl);
 
             submodule_update(sourceDir);
         }
         CliGitFetch fetch = new CliGitFetch();
-        log.error("doing fetch");
+        log.debug("doing fetch");
         fetch.fetch(sourceDir);
-        log.error("fetch complete");
+        log.debug("fetch complete");
 
         return dotGit;
     }
@@ -173,7 +173,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     {
         DotGit dotGit = DotGit.getInstance(sourceDir);
         if (!sourceDir.exists()) {
-            log.error("no repo found, creating");
+            log.debug("no repo found, creating");
             CliGitClone clone = new CliGitClone();
             clone.clone(sourceDir.getParentFile(), repositoryUrl);
 
@@ -341,7 +341,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
         Ref remoteBranch = Ref.createBranchRef("origin/" + this.remoteBranch);
-        Ref localBranch = Ref.createBranchRef(this.remoteBranch);
 
         if (sourceDir.exists()) {
             fetch(sourceDir, repositoryUrl);
@@ -351,10 +350,13 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
         } else {
             clone( sourceDir, repositoryUrl);
-            checkout( sourceDir, remoteBranch, localBranch );
+            if (isRemoteBranchSpecified()) checkout( sourceDir, remoteBranch, Ref.createBranchRef(this.remoteBranch) );
         }
     }
 
+    private boolean isRemoteBranchSpecified(){
+        return remoteBranch != null;
+    }
 
     public ErrorCollection validate( BuildConfiguration buildConfiguration)
     {

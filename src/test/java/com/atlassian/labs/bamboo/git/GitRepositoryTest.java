@@ -21,30 +21,30 @@ import com.atlassian.bamboo.repository.RepositoryException;
 public class GitRepositoryTest extends TestCase
 {
     @Test
-    public void testcLONE() throws IOException, JavaGitException {
+    public void testClone() throws IOException, JavaGitException {
         GitRepository gitRepository = new GitRepository();
         gitRepository.setRemoteBranch("feature1");
-        File sourceDir = getCheckoutDirectory();
+        File sourceDir = getCheckoutDirectory("testRepo1");
         gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
+        Ref ref = gitRepository.gitStatus(sourceDir);
+        assertEquals("feature1", ref.getName());
     }
 
     @Test
-    public void testStatus() throws IOException, JavaGitException {
+    public void testCloneDefault() throws IOException, JavaGitException {
+        // We dont support switching branches on a checkout yet, so check out to different folder.
         GitRepository gitRepository = new GitRepository();
-        gitRepository.setRemoteBranch("feature1");
-        File sourceDir = getCheckoutDirectory();
+        File sourceDir = getCheckoutDirectory("testRepo2");
         gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
-
         Ref ref = gitRepository.gitStatus(sourceDir);
-
+        assertEquals("featureDefault", ref.getName());
     }
-
 
     @Test
     public void testHistory() throws IOException, JavaGitException, RepositoryException {
         GitRepository gitRepository = new GitRepository();
         gitRepository.setRemoteBranch("featureDefault");
-        File sourceDir = getCheckoutDirectory();
+        File sourceDir = getCheckoutDirectory("testRepo1");
         gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
 
 
@@ -64,10 +64,11 @@ public class GitRepositoryTest extends TestCase
 
     }
 
-    private File getCheckoutDirectory() {
-        File projectDir = new File("testRepo");
+    private File getCheckoutDirectory(String loc) {
+        File projectDir = new File(loc);
+        if (projectDir.exists()) projectDir.delete();
         if (!projectDir.exists()) projectDir.mkdir();
-        File sourceDir = new File("testRepo/checkout");
+        File sourceDir = new File(loc + "/checkout");
         return sourceDir;
     }
 
