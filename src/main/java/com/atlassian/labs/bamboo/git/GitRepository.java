@@ -133,7 +133,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             
             final List<Commit> commits = new ArrayList<Commit>();
 
-            final String latestRevisionOnSvnServer = detectCommitsForUrl(repositoryUrl, lastVcsRevisionKey, commits, planKey);
+            
+            final String latestRevisionOnSvnServer = detectCommitsForUrl(repositoryUrl, lastVcsRevisionKey, commits, sourceDir, planKey);
 
             String lastRevisionChecked = latestRevisionOnSvnServer;
             log.error("last revision:"+lastRevisionChecked);
@@ -183,7 +184,9 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
      Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
          GitStatus gitStatus = new GitStatus();
-         GitStatusResponse response = gitStatus.status(sourceDir);
+         GitStatusOptions gitStatusOptions = new GitStatusOptions();
+         gitStatusOptions.setOptAll(true);
+         GitStatusResponse response = gitStatus.status(sourceDir, gitStatusOptions);
          return response.getBranch();
      }
 
@@ -216,10 +219,10 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @param lastRevisionChecked - latest revision checked for this URL. Null if never checked
      * @param commits - the commits are added to this list
      * @param planKey - used for debugging only
-     * @return
+     * @return The date/time of the last commit found.
      */
     
-    private String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits,  String planKey) throws RepositoryException, IOException, JavaGitException
+    String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
         log.error("detecting commits for "+lastRevisionChecked);
         GitLog gitLog = new GitLog();
@@ -228,10 +231,11 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         {
             opt.setOptLimitCommitAfter(true, lastRevisionChecked);
         }
-        List<GitLogResponse.Commit> gitCommits = gitLog.log(getCheckoutDirectory(planKey), opt, Ref.createBranchRef("origin/"+remoteBranch));
+        opt.setOptFileDetails(true);
+        List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
         if (gitCommits.size() > 1)
         {
-            gitCommits.remove(gitCommits.size()-1);
+            gitCommits.remove(gitCommits.size()-1);  // Because lastRevisionChecked is included
             log.error("commits found:"+gitCommits.size());
             String startRevision = gitCommits.get(gitCommits.size() - 1).getDateString();
             String latestRevisionOnServer = gitCommits.get(0).getDateString();
@@ -332,7 +336,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
         submodule_update(sourceDir);
 
-        return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), planKey);
+        return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
     }
 
     void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
