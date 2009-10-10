@@ -117,15 +117,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     };
 
-    // ---------------------------------------------------------------------------------------------------- Constructors
-
-    // -------------------------------------------------------------------------------------------------- Public Methods
-
-    public void addDefaultValues( BuildConfiguration buildConfiguration)
-    {
-        super.addDefaultValues(buildConfiguration);
-        quietPeriodHelper.addDefaultValues(buildConfiguration);
-    }
 
     
     public synchronized BuildChanges collectChangesSinceLastBuild( String planKey,  String lastVcsRevisionKey) throws RepositoryException
@@ -189,6 +180,12 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
         return dotGit;
     }
+
+     Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
+         GitStatus gitStatus = new GitStatus();
+         GitStatusResponse response = gitStatus.status(sourceDir);
+         return response.getBranch();
+     }
 
     private void checkout(File sourceDir, Ref remoteBranch, Ref localBranch) throws IOException, JavaGitException {
         GitCheckout gitCheckout = new GitCheckout();
@@ -277,13 +274,29 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     @Override
     public boolean referencesDifferentRepository() {
-        return super.referencesDifferentRepository();    //To change body of overridden methods use File | Settings | File Templates.
+        File cwd = new File(".");
+        String foo = null;
+        try {
+            foo = cwd.getCanonicalPath();
+            System.out.println("foo = " + foo);
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        //Ref ref = gitStatus(new File("checkout"));
+        //return !ref.getName().equals( remoteBranch);
+        // Also check repo url
+        return super.referencesDifferentRepository();
     }
 
     @NotNull
     @Override
     public File getSourceCodeDirectory(@NotNull String s) throws RepositoryException {
-        return super.getSourceCodeDirectory(s);    //To change body of overridden methods use File | Settings | File Templates.
+        File codeDirectory = super.getSourceCodeDirectory(s);
+        try {
+            return new File(codeDirectory.getCanonicalPath() + "/checkout");    //To change body of overridden methods use File | Settings | File Templates.
+        } catch (IOException e) {
+            throw new RepositoryException("getSourceCodeDirectory", e);
+        }
     }
 
     public String retrieveSourceCode( String planKey, String vcsRevisionKey) throws RepositoryException
@@ -297,6 +310,16 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         } catch (JavaGitException e) {
             throw new RepositoryException("retrieveSourceCode", e);
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------------- Constructors
+
+    // -------------------------------------------------------------------------------------------------- Public Methods
+
+    public void addDefaultValues( BuildConfiguration buildConfiguration)
+    {
+        super.addDefaultValues(buildConfiguration);
+        quietPeriodHelper.addDefaultValues(buildConfiguration);
     }
 
     String retreiveSourceCodeWithException(String planKey, String vcsRevisionKey) throws RepositoryException, IOException, JavaGitException

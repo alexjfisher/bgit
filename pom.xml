@@ -77,5 +77,10 @@
             <groupId>junit</groupId>
             <version>4.7</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+        </dependency>
     </dependencies>
 </project>
