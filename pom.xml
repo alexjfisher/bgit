@@ -71,6 +71,37 @@
         <url>http://svn.atlassian.com/fisheye/browse/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://maven.atlassian.com/repository/public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>atlassian-m1-repository</id>
+            <url>https://maven.atlassian.com/maven1</url>
+            <layout>legacy</layout>
+        </repository>
+
+    </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>atlassian-public</id>
+                    <url>https://maven.atlassian.com/repository/public</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                </pluginRepository>
+            </pluginRepositories>
+
     <dependencies>
         <dependency>
             <artifactId>junit</artifactId>
