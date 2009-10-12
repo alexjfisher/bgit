@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
-import edu.nyu.cs.javagit.api.commands.*;
 import org.junit.Test;
 import com.atlassian.bamboo.commit.Commit;
 import com.atlassian.bamboo.repository.RepositoryException;
@@ -25,17 +24,17 @@ public class GitRepositoryTest extends TestCase
     }
 
     private void getTestRepoFromGithub(GitRepository gitRepository, File sourceDir) throws IOException, JavaGitException {
-        gitRepository.cloneOrFetch(sourceDir, getGitHubRepoUrl());
+        gitRepository.cloneOrFetch(sourceDir);
     }
 
     @Test
     public void testClone() throws IOException, JavaGitException {
-        GitRepository gitRepository = new GitRepository();
+        GitRepository gitRepository = new GitRepository(getGitHubRepoUrl(), "testRepo1");
         File sourceDir = getCheckoutDirectory("testRepo1");
         gitRepository.setRemoteBranch("feature1");
-        assertFalse( gitRepository.existsWithGitRepo( sourceDir));
+        assertFalse( GitRepository.containsValidRepo( sourceDir));
         getTestRepoFromGithub(gitRepository, sourceDir);
-        assertTrue( gitRepository.existsWithGitRepo( sourceDir));
+        assertTrue( GitRepository.containsValidRepo( sourceDir));
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("feature1", ref.getName());
     }
@@ -43,8 +42,8 @@ public class GitRepositoryTest extends TestCase
     @Test
     public void testCloneDefault() throws IOException, JavaGitException {
         // We dont support switching branches on a checkout yet, so check out to different folder.
-        GitRepository gitRepository = new GitRepository();
         File sourceDir = getCheckoutDirectory("testRepo2");
+        GitRepository gitRepository = new GitRepository(getGitHubRepoUrl(), null);
         getTestRepoFromGithub(gitRepository, sourceDir);
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("featureDefault", ref.getName());
@@ -52,7 +51,7 @@ public class GitRepositoryTest extends TestCase
 
     @Test
     public void testIsOnBranch() throws IOException, JavaGitException {
-        GitRepository gitRepository = new GitRepository();
+        GitRepository gitRepository = new GitRepository(getGitHubRepoUrl(), null);
         File sourceDir = getCheckoutDirectory("testRepo2");
         getTestRepoFromGithub(gitRepository, sourceDir);
         assertTrue(gitRepository.isOnBranch(sourceDir, Ref.createBranchRef("featureDefault")));
@@ -61,7 +60,7 @@ public class GitRepositoryTest extends TestCase
 
     @Test
     public void testHistory() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository();
+        GitRepository gitRepository = new GitRepository(getGitHubRepoUrl(), "featureDefault");
         gitRepository.setRemoteBranch("featureDefault");
         File sourceDir = getCheckoutDirectory("testRepo1");
         getTestRepoFromGithub(gitRepository, sourceDir);

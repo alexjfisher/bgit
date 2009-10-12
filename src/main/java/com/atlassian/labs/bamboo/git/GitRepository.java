@@ -42,7 +42,6 @@ import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.ww2.actions.build.admin.create.BuildConfiguration;
 import com.opensymphony.util.UrlUtils;
 
-import edu.nyu.cs.javagit.api.DotGit;
 import edu.nyu.cs.javagit.api.JavaGitException;
 import edu.nyu.cs.javagit.api.Ref;
 import edu.nyu.cs.javagit.api.commands.*;
@@ -103,6 +102,15 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     private int quietPeriod = QuietPeriodHelper.DEFAULT_QUIET_PERIOD;
     private int maxRetries = QuietPeriodHelper.DEFAULT_MAX_RETRIES;
 
+
+    public GitRepository() {
+    }
+
+    public GitRepository(String repositoryUrl, String remoteBranch) {
+        this.repositoryUrl = repositoryUrl;
+        this.remoteBranch = remoteBranch;
+    }
+
     /**
      * Maps the path to the latest checked revision
      */
@@ -132,7 +140,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
             File sourceDir = getCheckoutDirectory(planKey);    //  Project/checkout is value
 
-            cloneOrFetch(sourceDir, repositoryUrl);
+            cloneOrFetch(sourceDir);
             
             final List<Commit> commits = new ArrayList<Commit>();
 
@@ -307,7 +315,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
                           //  vcsRevisonKey == Fri Oct 9 14:51:41 2009 +0200
         File sourceDir = getCheckoutDirectory(planKey);
                             // sourceedir = xxx/checkout
-        cloneOrFetch(sourceDir, repositoryUrl);
+        cloneOrFetch(sourceDir);
 
         submodule_update(sourceDir);
 
@@ -325,14 +333,13 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * entire repository, probably using the isRepositoryDifferent method or similar.
      *
      * @param sourceDir The checkout directory
-     * @param repositoryUrl The repo to check out.
      * @throws IOException When something bad happens
      * @throws JavaGitException When something else bad happens.
      */
-    void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
+    void cloneOrFetch(File sourceDir) throws IOException, JavaGitException {
         Ref branchWithOriginPrefix = Ref.createBranchRef("origin/" + this.remoteBranch);
 
-        if (existsWithGitRepo(sourceDir)) {
+        if (containsValidRepo(sourceDir)) {
             CliGitFetch fetch = new CliGitFetch();
             log.debug("doing fetch");
             fetch.fetch(sourceDir);
@@ -357,7 +364,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    boolean existsWithGitRepo(File sourceDir) throws IOException {
+    static boolean containsValidRepo(File sourceDir) throws IOException {
         return sourceDir.exists() &&  new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists();
 
     }
