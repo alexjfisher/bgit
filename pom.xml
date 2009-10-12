@@ -38,33 +38,13 @@
             <target>1.5</target>
           </configuration>
         </plugin>
+           <!-- plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+          </plugin -->
       </plugins>
     </build>
 
-    <!-- TODO: Add project description -->
-    <!--
-    <description></description>
-	<url></url>
-    -->
-    
-    <!-- TODO: Complete developer details -->
-    <!--
-	<developers>
-		<developer>
-			<name>John Smith</name>
-			<organization>Example Company</organization>
-		</developer>
-	</developers>
-	-->
-    
-    <!-- TODO: Complete source control details -->
-    <!--
-    <scm>
-		<connection></connection>
-		<developerConnection></developerConnection>
-		<url></url>
-	</scm>
-	-->
     <scm>
         <connection>scm:svn:http://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</connection>
         <developerConnection>scm:svn:https://svn.atlassian.com/svn/public/atlassian/bamboo/plugins/bamboo-plugin-archetype</developerConnection>
