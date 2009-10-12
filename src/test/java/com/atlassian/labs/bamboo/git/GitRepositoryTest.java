@@ -20,8 +20,12 @@ import com.atlassian.bamboo.repository.RepositoryException;
  */
 public class GitRepositoryTest extends TestCase
 {
+    private String getGitHubRepoUrl() {
+        return "git://github.com/krosenvold/bgit-unittest.git";
+    }
+
     private void getTestRepoFromGithub(GitRepository gitRepository, File sourceDir) throws IOException, JavaGitException {
-        gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
+        gitRepository.cloneOrFetch(sourceDir, getGitHubRepoUrl());
     }
 
     @Test
@@ -54,7 +58,7 @@ public class GitRepositoryTest extends TestCase
 
         // Fri Oct 9 14:51:41 2009 +0200
         List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        String s = gitRepository.detectCommitsForUrl("git://github.com/krosenvold/bgit-unittest.git", "Fri Oct 9 15:37:45 2009 +0200", results, sourceDir, "UT-KEY");
+        String s = gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 9 15:37:45 2009 +0200", results, sourceDir, "UT-KEY");
 
         assertEquals(2, results.size());
         Commit c0 = results.get(0);

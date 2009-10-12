@@ -121,7 +121,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     
     public synchronized BuildChanges collectChangesSinceLastBuild( String planKey,  String lastVcsRevisionKey) throws RepositoryException
     {
-        log.error("determining if there have been changes for " + planKey + " since "+lastVcsRevisionKey);
+        log.debug("determining if there have been changes for " + planKey + " since "+lastVcsRevisionKey);
         try
         {
 
@@ -137,7 +137,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             final String latestRevisionOnSvnServer = detectCommitsForUrl(repositoryUrl, lastVcsRevisionKey, commits, sourceDir, planKey);
 
             String lastRevisionChecked = latestRevisionOnSvnServer;
-            log.error("last revision:"+lastRevisionChecked);
+            log.debug("last revision:"+lastRevisionChecked);
 
             return new BuildChangesImpl(String.valueOf(lastRevisionChecked), commits);
         } catch (IOException e)
@@ -200,7 +200,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private void submodule_update(File sourceDir) throws IOException, JavaGitException
     {
-        log.error("doing submodule update");
+        log.debug("doing submodule update");
         CliGitSubmodule submodule = new CliGitSubmodule();
         submodule.init(sourceDir);
         submodule.update(sourceDir);
@@ -224,7 +224,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     
     String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
-        log.error("detecting commits for "+lastRevisionChecked);
+        log.debug("detecting commits for "+lastRevisionChecked);
         GitLog gitLog = new GitLog();
         GitLogOptions opt = new GitLogOptions();
         if (lastRevisionChecked != null)
@@ -236,7 +236,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         if (gitCommits.size() > 1)
         {
             gitCommits.remove(gitCommits.size()-1);  // Because lastRevisionChecked is included
-            log.error("commits found:"+gitCommits.size());
+            log.debug("commits found:"+gitCommits.size());
             String startRevision = gitCommits.get(gitCommits.size() - 1).getDateString();
             String latestRevisionOnServer = gitCommits.get(0).getDateString();
             log.info("Collecting changes for '" + planKey + "' on path '" + repositoryUrl + "' from version " + startRevision + " to " + latestRevisionOnServer);
@@ -272,7 +272,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             }
             return latestRevisionOnServer;
         }
-        log.error("returning last revision:"+lastRevisionChecked);
+        log.debug("returning last revision:"+lastRevisionChecked);
         return lastRevisionChecked;
     }
 
@@ -305,7 +305,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     public String retrieveSourceCode( String planKey, String vcsRevisionKey) throws RepositoryException
     {
-        log.error("retrieving source code");
+        log.debug("retrieving source code");
         try
         {
             return retreiveSourceCodeWithException(planKey, vcsRevisionKey);
@@ -344,7 +344,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
         if (sourceDir.exists()) {
             fetch(sourceDir, repositoryUrl);
-            log.error("doing merge");
+            log.debug("doing merge");
             GitMerge merge = new GitMerge();
             // FIXME: should really only merge to the target revision
             merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
@@ -386,7 +386,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
 
         quietPeriodHelper.validate(buildConfiguration, errorCollection);
-        log.error("validation results:"+errorCollection);
+        log.debug("validation results:"+errorCollection);
         return errorCollection;
     }
 
@@ -549,7 +549,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
         catch (EncryptionException e)
         {
-            log.error("Failed to encrypt password", e);
+            log.debug("Failed to encrypt password", e);
             this.passphrase = null;
         }
     }
