@@ -361,6 +361,11 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
+    boolean existsWithGitRepo(File sourceDir) throws IOException {
+        return sourceDir.exists() &&  new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists();
+
+    }
+
     boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {
         GitBranch gitBranch = new GitBranch();
         GitBranchResponse response = gitBranch.branch(sourceDir);

@@ -33,7 +33,9 @@ public class GitRepositoryTest extends TestCase
         GitRepository gitRepository = new GitRepository();
         File sourceDir = getCheckoutDirectory("testRepo1");
         gitRepository.setRemoteBranch("feature1");
+        assertFalse( gitRepository.existsWithGitRepo( sourceDir));
         getTestRepoFromGithub(gitRepository, sourceDir);
+        assertTrue( gitRepository.existsWithGitRepo( sourceDir));
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("feature1", ref.getName());
     }
