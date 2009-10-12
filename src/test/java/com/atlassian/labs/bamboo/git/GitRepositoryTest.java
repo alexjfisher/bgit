@@ -31,8 +31,8 @@ public class GitRepositoryTest extends TestCase
     @Test
     public void testClone() throws IOException, JavaGitException {
         GitRepository gitRepository = new GitRepository();
-        gitRepository.setRemoteBranch("feature1");
         File sourceDir = getCheckoutDirectory("testRepo1");
+        gitRepository.setRemoteBranch("feature1");
         getTestRepoFromGithub(gitRepository, sourceDir);
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("feature1", ref.getName());
@@ -46,6 +46,15 @@ public class GitRepositoryTest extends TestCase
         getTestRepoFromGithub(gitRepository, sourceDir);
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("featureDefault", ref.getName());
+    }
+
+    @Test
+    public void testIsOnBranch() throws IOException, JavaGitException {
+        GitRepository gitRepository = new GitRepository();
+        File sourceDir = getCheckoutDirectory("testRepo2");
+        getTestRepoFromGithub(gitRepository, sourceDir);
+        assertTrue(gitRepository.isOnBranch(sourceDir, Ref.createBranchRef("featureDefault")));
+        assertFalse(gitRepository.isOnBranch(sourceDir, Ref.createBranchRef("feature1")));
     }
 
     @Test
@@ -74,10 +83,22 @@ public class GitRepositoryTest extends TestCase
 
     private File getCheckoutDirectory(String loc) {
         File projectDir = new File(loc);
-        if (projectDir.exists()) projectDir.delete();
+        if (projectDir.exists()) deleteDir( projectDir);
         if (!projectDir.exists()) projectDir.mkdir();
-        File sourceDir = new File(loc + "/checkout");
+        File sourceDir = new File(loc + File.separator + "checkout");
         return sourceDir;
     }
 
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
+    }
 }

@@ -48,6 +48,7 @@ import edu.nyu.cs.javagit.api.commands.*;
 import edu.nyu.cs.javagit.client.cli.CliGitClone;
 import edu.nyu.cs.javagit.client.cli.CliGitFetch;
 import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
+import edu.nyu.cs.javagit.client.GitCloneResponseImpl;
 
 public class GitRepository extends AbstractRepository implements WebRepositoryEnabledRepository, InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
 {
@@ -175,7 +176,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         if (!sourceDir.exists()) {
             log.debug("no repo found, creating");
             CliGitClone clone = new CliGitClone();
-            clone.clone(sourceDir.getParentFile(), repositoryUrl);
+            GitCloneResponseImpl response = clone.clone(sourceDir.getParentFile(), repositoryUrl);
 
             submodule_update(sourceDir);
         }
@@ -351,9 +352,22 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             merge.merge(sourceDir, branchWithOriginPrefix);
         } else {
             clone( sourceDir, repositoryUrl);
-            if (isRemoteBranchSpecified()) checkout( sourceDir, branchWithOriginPrefix, Ref.createBranchRef(this.remoteBranch) );
+            if (isRemoteBranchSpecified()) {
+                Ref desiredBranch = Ref.createBranchRef(this.remoteBranch);
+                if (!isOnBranch( sourceDir, desiredBranch)) {
+                    checkout( sourceDir, branchWithOriginPrefix, desiredBranch);
+                }
+            }
         }
     }
+
+    boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {
+        GitBranch gitBranch = new GitBranch();
+        GitBranchResponse response = gitBranch.branch(sourceDir);
+        return response.getCurrentBranch().equals( branchName);
+    }
+
+    
 
     private boolean isRemoteBranchSpecified(){
         return remoteBranch != null;
