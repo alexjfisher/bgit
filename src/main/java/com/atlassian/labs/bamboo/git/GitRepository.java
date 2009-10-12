@@ -231,6 +231,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         {
             opt.setOptLimitCommitAfter(true, lastRevisionChecked);
         }
+
         opt.setOptFileDetails(true);
         List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
         if (gitCommits.size() > 1)
@@ -297,7 +298,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     public File getSourceCodeDirectory(@NotNull String s) throws RepositoryException {
         File codeDirectory = super.getSourceCodeDirectory(s);
         try {
-            return new File(codeDirectory.getCanonicalPath() + "/checkout");    //To change body of overridden methods use File | Settings | File Templates.
+            return new File(codeDirectory.getCanonicalPath() + File.separator + "checkout");  
         } catch (IOException e) {
             throw new RepositoryException("getSourceCodeDirectory", e);
         }
@@ -340,17 +341,17 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
     void cloneOrFetch(File sourceDir, String repositoryUrl) throws IOException, JavaGitException {
-        Ref remoteBranch = Ref.createBranchRef("origin/" + this.remoteBranch);
+        Ref branchWithOriginPrefix = Ref.createBranchRef("origin/" + this.remoteBranch);
 
         if (sourceDir.exists()) {
             fetch(sourceDir, repositoryUrl);
             log.debug("doing merge");
             GitMerge merge = new GitMerge();
             // FIXME: should really only merge to the target revision
-            merge.merge(sourceDir, Ref.createBranchRef("origin/"+remoteBranch));
+            merge.merge(sourceDir, branchWithOriginPrefix);
         } else {
             clone( sourceDir, repositoryUrl);
-            if (isRemoteBranchSpecified()) checkout( sourceDir, remoteBranch, Ref.createBranchRef(this.remoteBranch) );
+            if (isRemoteBranchSpecified()) checkout( sourceDir, branchWithOriginPrefix, Ref.createBranchRef(this.remoteBranch) );
         }
     }
 
