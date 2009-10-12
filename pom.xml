@@ -87,6 +87,12 @@
             <url>https://maven.atlassian.com/maven1</url>
             <layout>legacy</layout>
         </repository>
+        <repository>
+            <id>jboss-with-jms</id> <!-- This repo is included because it contains jms-1.1.jar ;) -->
+            <url>http://repository.jboss.com/maven2</url>
+        </repository>
+        
+        
 
     </repositories>
             <pluginRepositories>

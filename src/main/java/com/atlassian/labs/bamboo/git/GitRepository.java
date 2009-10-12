@@ -208,7 +208,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private File getCheckoutDirectory(String planKey) throws RepositoryException
     {
-        return new File(getSourceCodeDirectory(planKey), "checkout");
+        return getSourceCodeDirectory(planKey);
     }
 
     /**

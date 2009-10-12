@@ -20,12 +20,16 @@ import com.atlassian.bamboo.repository.RepositoryException;
  */
 public class GitRepositoryTest extends TestCase
 {
+    private void getTestRepoFromGithub(GitRepository gitRepository, File sourceDir) throws IOException, JavaGitException {
+        gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
+    }
+
     @Test
     public void testClone() throws IOException, JavaGitException {
         GitRepository gitRepository = new GitRepository();
         gitRepository.setRemoteBranch("feature1");
         File sourceDir = getCheckoutDirectory("testRepo1");
-        gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
+        getTestRepoFromGithub(gitRepository, sourceDir);
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("feature1", ref.getName());
     }
@@ -35,7 +39,7 @@ public class GitRepositoryTest extends TestCase
         // We dont support switching branches on a checkout yet, so check out to different folder.
         GitRepository gitRepository = new GitRepository();
         File sourceDir = getCheckoutDirectory("testRepo2");
-        gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
+        getTestRepoFromGithub(gitRepository, sourceDir);
         Ref ref = gitRepository.gitStatus(sourceDir);
         assertEquals("featureDefault", ref.getName());
     }
@@ -45,7 +49,7 @@ public class GitRepositoryTest extends TestCase
         GitRepository gitRepository = new GitRepository();
         gitRepository.setRemoteBranch("featureDefault");
         File sourceDir = getCheckoutDirectory("testRepo1");
-        gitRepository.cloneOrFetch(sourceDir, "git://github.com/krosenvold/bgit-unittest.git");
+        getTestRepoFromGithub(gitRepository, sourceDir);
 
 
         // Fri Oct 9 14:51:41 2009 +0200

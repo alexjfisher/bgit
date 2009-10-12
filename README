@@ -26,7 +26,7 @@ able to checkout neither.
 
 
 1.1.3 RELEASE NOTES
-(big thanks to Kristian Roselvold)
+(big thanks to Kristian Rosenvold)
 - This should support branches properly. Please note that when changing
   branches on a build, you still need to clean the build using the bamboo
   console. 
