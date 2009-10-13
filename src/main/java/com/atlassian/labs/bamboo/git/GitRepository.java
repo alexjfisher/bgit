@@ -48,7 +48,6 @@ import edu.nyu.cs.javagit.api.commands.*;
 import edu.nyu.cs.javagit.client.cli.CliGitClone;
 import edu.nyu.cs.javagit.client.cli.CliGitFetch;
 import edu.nyu.cs.javagit.client.cli.CliGitSubmodule;
-import edu.nyu.cs.javagit.client.GitCloneResponseImpl;
 
 public class GitRepository extends AbstractRepository implements WebRepositoryEnabledRepository, InitialBuildAwareRepository, MutableQuietPeriodAwareRepository
 {
@@ -57,7 +56,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     // ------------------------------------------------------------------------------------------------------- Constants
     public static final String NAME = "Git";
-    public static final String KEY = "git";
+    //public static final String KEY = "git";
 
     private static final String REPO_PREFIX = "repository.git.";
     public static final String GIT_REPO_URL = REPO_PREFIX + "repositoryUrl";
@@ -71,7 +70,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     private static final String USE_EXTERNALS = REPO_PREFIX + "useExternals";
 
-    private static final String AUTH_SSH = "ssh";
+   // private static final String AUTH_SSH = "ssh";
     private static final String PASSWORD_AUTHENTICATION = "password";
 
     private static final String TEMPORARY_GIT_ADVANCED = "temporary.git.advanced";
@@ -162,14 +161,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     @Override
     public boolean referencesDifferentRepository() {
-        File cwd = new File(".");
-        String foo;
-        try {
-            foo = cwd.getCanonicalPath();
-            System.out.println("foo = " + foo);
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
         //Ref ref = gitStatus(new File("checkout"));
         //return !ref.getName().equals( remoteBranch);
         // Also check repo url
@@ -247,9 +238,10 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
                     authorName = Author.UNKNOWN_AUTHOR;
                 }
                 commit.setAuthor(new AuthorImpl(authorName));
-                commit.setDate(new Date(logEntry.getDateString()));
+                @SuppressWarnings({"deprecation"}) Date date2 = new Date(logEntry.getDateString());
+                commit.setDate(date2);
                 commit.setComment(logEntry.getMessage());
-                List<CommitFile> files = new ArrayList();
+                List<CommitFile> files = new ArrayList<CommitFile>();
 
                 if (logEntry.getFiles() != null) {
                     for (GitLogResponse.CommitFile file : logEntry.getFiles())
@@ -352,7 +344,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         } else {
             log.debug("no repo found, creating");
             CliGitClone clone = new CliGitClone();
-            GitCloneResponseImpl response = clone.clone(sourceDir.getParentFile(), repositoryUrl);
+            clone.clone(sourceDir.getParentFile(), repositoryUrl);
             submodule_update(sourceDir);
 
             if (isRemoteBranchSpecified()) {
@@ -381,7 +373,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return remoteBranch != null;
     }
 
-    public ErrorCollection validate( BuildConfiguration buildConfiguration)
+    @NotNull public ErrorCollection validate( @NotNull BuildConfiguration buildConfiguration)
     {
         ErrorCollection errorCollection = super.validate(buildConfiguration);
 
@@ -414,9 +406,9 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
 
-    public boolean isRepositoryDifferent( Repository repository)
+    public boolean isRepositoryDifferent(@NotNull Repository repository)
     {
-        if (repository != null && repository instanceof GitRepository)
+        if (repository instanceof GitRepository)
         {
             GitRepository existing = (GitRepository) repository;
             return !new EqualsBuilder()
@@ -431,7 +423,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    public void prepareConfigObject( BuildConfiguration buildConfiguration)
+    public void prepareConfigObject( @NotNull BuildConfiguration buildConfiguration)
     {
         String repositoryKey = buildConfiguration.getString(SELECTED_REPOSITORY);
 
@@ -466,7 +458,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         }
     }
 
-    public void populateFromConfig( HierarchicalConfiguration config)
+    public void populateFromConfig( @NotNull HierarchicalConfiguration config)
     {
         super.populateFromConfig(config);
 
@@ -493,7 +485,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
     
-    public HierarchicalConfiguration toConfiguration()
+    @NotNull public HierarchicalConfiguration toConfiguration()
     {
         HierarchicalConfiguration configuration = super.toConfiguration();
         configuration.setProperty(GIT_REPO_URL, getRepositoryUrl());
@@ -525,6 +517,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public boolean isAdvancedOptionEnabled( BuildConfiguration buildConfiguration)
     {
         final boolean useExternals = buildConfiguration.getBoolean(USE_EXTERNALS, false);
@@ -539,7 +532,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @return The name
      */
     
-    public String getName()
+    @NotNull public String getName()
     {
         return NAME;
     }
@@ -785,7 +778,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
     @Override
     
-    public String getWebRepositoryUrlForCommit( Commit commit)
+    public String getWebRepositoryUrlForCommit( @NotNull Commit commit)
     {
         ViewCvsFileLinkGenerator fileLinkGenerator = new ViewCvsFileLinkGenerator(webRepositoryUrl);
         return null;// fileLinkGenerator.getWebRepositoryUrlForCommit(commit, webRepositoryUrlRepoName, ViewCvsFileLinkGenerator.GIT_REPO_TYPE);
