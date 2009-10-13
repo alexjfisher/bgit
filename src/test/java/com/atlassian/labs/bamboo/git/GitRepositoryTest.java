@@ -20,7 +20,7 @@ import com.atlassian.bamboo.repository.RepositoryException;
 public class GitRepositoryTest extends TestCase
 {
     private String getGitHubRepoUrl() {
-        return "git://github.com/krosenvold/bgit-unittest.git";
+        return "git://github.com/slnc/bgit-unittest.git";
     }
 
     private void getTestRepoFromGithub(GitRepository gitRepository, File sourceDir) throws IOException, JavaGitException {
