@@ -240,7 +240,9 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
                 commit.setAuthor(new AuthorImpl(authorName));
                 @SuppressWarnings({"deprecation"}) Date date2 = new Date(logEntry.getDateString());
                 commit.setDate(date2);
-                commit.setComment(logEntry.getMessage());
+
+                String msg = logEntry.getMessage() + " (" + logEntry.getSha() + ")";
+                commit.setComment(msg);
                 List<CommitFile> files = new ArrayList<CommitFile>();
 
                 if (logEntry.getFiles() != null) {
