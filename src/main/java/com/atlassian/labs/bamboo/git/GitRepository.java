@@ -183,11 +183,15 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         log.debug("retrieving source code");
         try
         {
-            return retreiveSourceCodeWithException(planKey, vcsRevisionKey);
+                String repositoryUrl = getSubstitutedRepositoryUrl();
+                File sourceDir = getCheckoutDirectory(planKey); // sourceedir = xxx/checkout
+                cloneOrFetch(sourceDir);
+                submodule_update(sourceDir);
+                return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
         } catch (IOException e) {
             throw new RepositoryException("retrieveSourceCode", e);
         } catch (JavaGitException e) {
-            throw new RepositoryException("retrieveSourceCode", e);
+            throw new RepositoryException(e.getMessage(), e);
         }
     }
 
@@ -303,18 +307,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         quietPeriodHelper.addDefaultValues(buildConfiguration);
     }
 
-    String retreiveSourceCodeWithException(String planKey, String vcsRevisionKey) throws RepositoryException, IOException, JavaGitException
-    {
-        String repositoryUrl = getSubstitutedRepositoryUrl();
-                          //  vcsRevisonKey == Fri Oct 9 14:51:41 2009 +0200
-        File sourceDir = getCheckoutDirectory(planKey);
-                            // sourceedir = xxx/checkout
-        cloneOrFetch(sourceDir);
-
-        submodule_update(sourceDir);
-
-        return detectCommitsForUrl(repositoryUrl, vcsRevisionKey, new ArrayList<Commit>(), sourceDir, planKey);
-    }
 
     /**
      * Clones or fetches the specified repository.
@@ -351,7 +343,12 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
             if (isRemoteBranchSpecified()) {
                 Ref desiredBranch = Ref.createBranchRef(this.remoteBranch);
-                if (!isOnBranch( sourceDir, desiredBranch)) {
+                GitBranchResponse branchList = getAllBranches(sourceDir);
+                boolean branchFound = branchList.containsBranch( branchWithOriginPrefix);
+                if (!branchFound) {
+                    throw new JavaGitException(12, "The branch " + branchWithOriginPrefix.getName() + " does not exist");
+                }
+                if (!branchList.getCurrentBranch().equals( desiredBranch)) {
                     checkout( sourceDir, branchWithOriginPrefix, desiredBranch);
                 }
             }
@@ -364,12 +361,17 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
     boolean isOnBranch(File sourceDir, Ref branchName) throws IOException, JavaGitException {
-        GitBranch gitBranch = new GitBranch();
-        GitBranchResponse response = gitBranch.branch(sourceDir);
+        GitBranchResponse response = getAllBranches(sourceDir);
         return response.getCurrentBranch().equals( branchName);
     }
 
-    
+    private GitBranchResponse getAllBranches(File sourceDir) throws IOException, JavaGitException {
+        GitBranch gitBranch = new GitBranch();
+        GitBranchOptions gitBranchOptions = new GitBranchOptions();
+        gitBranchOptions.setOptA(true);
+        return gitBranch.branch(sourceDir, gitBranchOptions);
+    }
+
 
     private boolean isRemoteBranchSpecified(){
         return remoteBranch != null;
@@ -722,7 +724,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
             return null;
         }
     }
-
 
     public String getEncryptedPassword()
     {
