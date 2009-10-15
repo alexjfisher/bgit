@@ -356,7 +356,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     }
 
     static boolean containsValidRepo(File sourceDir) throws IOException {
-        return sourceDir.exists() &&  new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists();
+        return sourceDir.exists() &&  (new File( sourceDir.getCanonicalPath() + File.separator + ".git").exists() || new File( sourceDir.getCanonicalPath() + File.separator + "HEAD").exists()); 
 
     }
 
