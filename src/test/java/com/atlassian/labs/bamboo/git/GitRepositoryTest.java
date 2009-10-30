@@ -23,7 +23,7 @@ import com.atlassian.bamboo.repository.RepositoryException;
 public class GitRepositoryTest
 {
     private static String getGitHubRepoUrl() {
-        return "git://github.com/slnc/bgit-unittest.git";
+        return "git://github.com/alexjfisher/bgit-unittest.git";
     }
 
 
@@ -89,15 +89,15 @@ public class GitRepositoryTest
         List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
         gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 9 15:37:45 2009 +0200", results, sourceDir, "UT-KEY");
 
-        assertEquals(2, results.size());
-        Commit c0 = results.get(0);
-        assertEquals(1, c0.getFiles().size());
-        assertEquals("OnDefault.txt", c0.getFiles().get(0).getName());
-        assertEquals("2d9b1997d64fa9501a0e4dec26cc9a07e3e8247f", c0.getFiles().get(0).getRevision());
+        assertEquals(4, results.size());
+        Commit c2 = results.get(2);
+        assertEquals(1, c2.getFiles().size());
+        assertEquals("OnDefault.txt", c2.getFiles().get(0).getName());
+        assertEquals("2d9b1997d64fa9501a0e4dec26cc9a07e3e8247f", c2.getFiles().get(0).getRevision());
 
-        Commit c1 = results.get(1);
-        assertEquals("File3.txt", c1.getFiles().get(0).getName());
-        assertEquals("a55e4702a0fdc210eaa17774dddc4890852396a7", c1.getFiles().get(0).getRevision());
+        Commit c3 = results.get(3);
+        assertEquals("File3.txt", c3.getFiles().get(0).getName());
+        assertEquals("a55e4702a0fdc210eaa17774dddc4890852396a7", c3.getFiles().get(0).getRevision());
 
     }
 
