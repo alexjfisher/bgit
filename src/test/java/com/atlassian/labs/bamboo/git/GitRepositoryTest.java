@@ -101,6 +101,17 @@ public class GitRepositoryTest
 
     }
 
+    @Test
+    public void testNonLinearHistory() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
+        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
+        makeWorkingCopy();
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 30 11:31:19 2009 +0000", results, sourceDir, "UT-KEY");
+
+        assertEquals(0, results.size());
+    }
 
     private static File getMasterRepoWorkingDirectory() {
         File masterRepoDir = new File("masterRepo");
