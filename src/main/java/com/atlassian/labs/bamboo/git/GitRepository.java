@@ -209,9 +209,36 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @throws JavaGitException when something goes wrong
      */
 
-    String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
+    String detectCommitsForUrl( String repositoryUrl, String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
         log.debug("detecting commits for "+lastRevisionChecked);
+        
+        if ((lastRevisionChecked != null) && (lastRevisionChecked.length() != 40)) {
+
+            log.info("lastRevisionChecked does not look like a SHA hash");
+            GitLog gitLog = new GitLog();
+            GitLogOptions opt = new GitLogOptions();
+            opt.setOptLimitCommitAfter(true, lastRevisionChecked);
+            opt.setOptFileDetails(true);
+            List<GitLogResponse.Commit> CandidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
+            if (CandidateGitCommits.size() < 1) {
+                throw new RepositoryException("No commits with revision: " + lastRevisionChecked);
+            }
+            for (GitLogResponse.Commit commit : CandidateGitCommits) {
+                if (commit.getDateString().equals(lastRevisionChecked)) {
+                    log.info("Converting lastRevisionChecked from Date into SHA hash");
+                    lastRevisionChecked = commit.getSha();
+                    break;
+                }
+            }
+
+
+        }
+        if ((lastRevisionChecked != null) && (lastRevisionChecked.length() != 40))
+        {
+            throw new RepositoryException("lastRevisionedChecked must be a SHA hash.  lastRevisionChecked=" + lastRevisionChecked);
+
+        }
         GitLog gitLog = new GitLog();
         GitLogOptions opt = new GitLogOptions();
         if (lastRevisionChecked != null)
