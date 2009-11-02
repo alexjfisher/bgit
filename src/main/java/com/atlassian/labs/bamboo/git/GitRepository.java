@@ -209,9 +209,18 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
      * @throws JavaGitException when something goes wrong
      */
 
-    String detectCommitsForUrl( String repositoryUrl, final String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
+    String detectCommitsForUrl( String repositoryUrl, String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
         log.debug("detecting commits for "+lastRevisionChecked);
+        
+        if (!isSha1(lastRevisionChecked)) {
+            lastRevisionChecked = getSha1FromCommitDate(lastRevisionChecked, checkoutDir);
+        }
+        if (!isSha1(lastRevisionChecked))
+        {
+            throw new RepositoryException("lastRevisionedChecked must be a SHA hash.  lastRevisionChecked=" + lastRevisionChecked);
+        }
+
         GitLog gitLog = new GitLog();
         GitLogOptions opt = new GitLogOptions();
         if (lastRevisionChecked != null)
@@ -221,7 +230,7 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 
         opt.setOptFileDetails(true);
         List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
-        if (gitCommits.size() > 1)
+        if (gitCommits.size() > 0)
         {
             log.debug("commits found:"+gitCommits.size());
             String startRevision = gitCommits.get(gitCommits.size() - 1).getSha();
@@ -266,9 +275,31 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return lastRevisionChecked;
     }
 
+    private String getSha1FromCommitDate(String lastRevisionChecked, File checkoutDir) throws JavaGitException, IOException, RepositoryException {
+        GitLog gitLog = new GitLog();
+        GitLogOptions opt = new GitLogOptions();
+        opt.setOptLimitCommitAfter(true, lastRevisionChecked);
+        opt.setOptFileDetails(true);
+        List<GitLogResponse.Commit> CandidateGitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/" + remoteBranch));
+        if (CandidateGitCommits.size() < 1) {
+            throw new RepositoryException("No commits with revision: " + lastRevisionChecked);
+        }
+        for (GitLogResponse.Commit commit : CandidateGitCommits) {
+            if (commit.getDateString().equals(lastRevisionChecked)) {
+                log.info("Converting lastRevisionChecked from Date into SHA hash");
+                return commit.getSha();
+            }
+        }
+        log.info("lastRevisionChecked " + lastRevisionChecked + " did not look like a sha1, but did not match a commit date. This may happen if the commit is gone");
+        return lastRevisionChecked;
+    }
+
+    private boolean isSha1(String lastRevisionChecked) {
+        return (lastRevisionChecked != null) && (lastRevisionChecked.length() == 40);
+    }
 
 
-     Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
+    Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
          GitStatus gitStatus = new GitStatus();
          GitStatusOptions gitStatusOptions = new GitStatusOptions();
          gitStatusOptions.setOptAll(true);
