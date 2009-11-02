@@ -53,7 +53,6 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
 {
     private static final Log log = LogFactory.getLog(GitRepository.class);
 
-
     // ------------------------------------------------------------------------------------------------------- Constants
     public static final String NAME = "Git";
     //public static final String KEY = "git";
@@ -217,17 +216,16 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         GitLogOptions opt = new GitLogOptions();
         if (lastRevisionChecked != null)
         {
-            opt.setOptLimitCommitAfter(true, lastRevisionChecked);
+            opt.setOptLimitCommitRange(true, lastRevisionChecked, "HEAD");
         }
 
         opt.setOptFileDetails(true);
         List<GitLogResponse.Commit> gitCommits = gitLog.log(checkoutDir, opt, Ref.createBranchRef("origin/"+remoteBranch));
         if (gitCommits.size() > 1)
         {
-            gitCommits.remove(gitCommits.size()-1);  // Because lastRevisionChecked is included
             log.debug("commits found:"+gitCommits.size());
-            String startRevision = gitCommits.get(gitCommits.size() - 1).getDateString();
-            String latestRevisionOnServer = gitCommits.get(0).getDateString();
+            String startRevision = gitCommits.get(gitCommits.size() - 1).getSha();
+            String latestRevisionOnServer = gitCommits.get(0).getSha();
             log.info("Collecting changes for '" + planKey + "' on path '" + repositoryUrl + "' from version " + startRevision + " to " + latestRevisionOnServer);
 
             for (GitLogResponse.Commit logEntry : gitCommits)

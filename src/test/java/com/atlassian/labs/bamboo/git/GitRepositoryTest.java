@@ -87,8 +87,7 @@ public class GitRepositoryTest
 
         // Fri Oct 9 14:51:41 2009 +0200
         List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 9 15:37:45 2009 +0200", results, sourceDir, "UT-KEY");
-
+        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "84965cc8dfc8af7fca02c78373413aceafc73c2f", results, sourceDir, "UT-KEY");
         assertEquals(4, results.size());
         Commit c2 = results.get(2);
         assertEquals(1, c2.getFiles().size());
@@ -108,7 +107,7 @@ public class GitRepositoryTest
         makeWorkingCopy();
 
         List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 30 11:31:19 2009 +0000", results, sourceDir, "UT-KEY");
+        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "fb6562c90de470294b879655a14640ab454ff2ae", results, sourceDir, "UT-KEY");
 
         assertEquals(0, results.size());
     }
