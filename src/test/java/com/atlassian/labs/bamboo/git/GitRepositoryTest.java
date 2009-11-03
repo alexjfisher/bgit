@@ -172,6 +172,18 @@ public class GitRepositoryTest
         assertEquals(3, results.size());
     }
 
+    @Test
+    public void testLastCheckedRevisionIsNull() throws IOException, JavaGitException, RepositoryException {
+        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
+        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
+        makeWorkingCopy();
+
+        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
+        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), null, results, sourceDir, "UT-KEY");
+
+        assertEquals(5, results.size());
+    }
+
     private static File getMasterRepoWorkingDirectory() {
         File masterRepoDir = new File("masterRepo");
         ensureDirExists(masterRepoDir);
