@@ -172,18 +172,6 @@ public class GitRepositoryTest
         assertEquals(3, results.size());
     }
 
-    @Test
-    public void testPluginUpgrade() throws IOException, JavaGitException, RepositoryException {
-        GitRepository gitRepository = new GitRepository(getMasterRepoCheckoutDirectory().getCanonicalPath(), "featureDefault");
-        File sourceDir = getCheckoutDirectory(getFreshWorkingCopyDir());
-        makeWorkingCopy();
-
-        List<com.atlassian.bamboo.commit.Commit> results = new ArrayList<Commit>();
-        gitRepository.detectCommitsForUrl(getGitHubRepoUrl(), "Fri Oct 9 15:38:10 2009 +0200", results, sourceDir, "UT-KEY");
-
-        assertEquals(3, results.size());
-    }
-
     private static File getMasterRepoWorkingDirectory() {
         File masterRepoDir = new File("masterRepo");
         ensureDirExists(masterRepoDir);
