@@ -213,11 +213,10 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     {
         log.debug("detecting commits for "+lastRevisionChecked);
 
-        if ((lastRevisionChecked != null) && (!isSha1(lastRevisionChecked))) {
+        if (isANonSha1RevisionSpecifier(lastRevisionChecked)) {
             lastRevisionChecked = getSha1FromCommitDate(lastRevisionChecked, checkoutDir);
         }
-        if ((lastRevisionChecked != null) && (!isSha1(lastRevisionChecked)))
-        {
+        if (isANonSha1RevisionSpecifier(lastRevisionChecked)) {
             throw new RepositoryException("lastRevisionedChecked must be a SHA hash.  lastRevisionChecked=" + lastRevisionChecked);
         }
 
@@ -275,6 +274,8 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return lastRevisionChecked;
     }
 
+
+
     private String getSha1FromCommitDate(String lastRevisionChecked, File checkoutDir) throws JavaGitException, IOException, RepositoryException {
         GitLog gitLog = new GitLog();
         GitLogOptions opt = new GitLogOptions();
@@ -294,10 +295,18 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
         return lastRevisionChecked;
     }
 
-    private boolean isSha1(String lastRevisionChecked) {
-        return (lastRevisionChecked != null) && (lastRevisionChecked.length() == 40);
+    private boolean isANonSha1RevisionSpecifier(String lastRevisionChecked) {
+        return isARevision(lastRevisionChecked) && !isSha1(lastRevisionChecked);
     }
 
+    private boolean isSha1(String lastRevisionChecked) {
+        return isARevision(lastRevisionChecked) && (lastRevisionChecked.length() == 40);
+    }
+
+    private boolean isARevision(String lastRevisionChecked) {
+        return (lastRevisionChecked != null);
+    }
+    
 
     Ref gitStatus(File sourceDir) throws IOException, JavaGitException {
          GitStatus gitStatus = new GitStatus();
