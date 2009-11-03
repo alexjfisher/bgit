@@ -212,11 +212,11 @@ public class GitRepository extends AbstractRepository implements WebRepositoryEn
     String detectCommitsForUrl( String repositoryUrl, String lastRevisionChecked,  final List<Commit> commits, File checkoutDir,  String planKey) throws RepositoryException, IOException, JavaGitException
     {
         log.debug("detecting commits for "+lastRevisionChecked);
-        
-        if (!isSha1(lastRevisionChecked)) {
+
+        if ((lastRevisionChecked != null) && (!isSha1(lastRevisionChecked))) {
             lastRevisionChecked = getSha1FromCommitDate(lastRevisionChecked, checkoutDir);
         }
-        if (!isSha1(lastRevisionChecked))
+        if ((lastRevisionChecked != null) && (!isSha1(lastRevisionChecked)))
         {
             throw new RepositoryException("lastRevisionedChecked must be a SHA hash.  lastRevisionChecked=" + lastRevisionChecked);
         }
